@@ -225,3 +225,25 @@ document.body.addEventListener('touchmove', function(e) {
         e.preventDefault();
     }
 }, { passive: false });
+
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    return false;
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'PrintScreen' || 
+        (e.ctrlKey && e.key === 's') || 
+        (e.ctrlKey && e.key === 'S') ||
+        (e.metaKey && e.key === 's') ||
+        (e.metaKey && e.key === 'S')) {
+        e.preventDefault();
+        return false;
+    }
+});
+
+document.addEventListener('keyup', function(e) {
+    if (e.key === 'PrintScreen') {
+        navigator.clipboard.writeText('');
+    }
+});
