@@ -81,7 +81,7 @@ async function init() {
             unblockedAt: Date.now(),
             timestamp: new Date().toISOString()
         });
-        sendTelegramMessage(`🔄 Пользователь передумал!\nID: ${userId}\nВыбор: Ладно, давай!`);
+        await sendTelegramMessage(`🔄 Пользователь передумал!\nID: ${userId}\nВыбор: Ладно, давай!`);
         document.getElementById('mainContent').classList.remove('hidden');
         window.history.replaceState({}, '', 'index.html');
         return;
@@ -104,11 +104,21 @@ async function init() {
 
 init();
 
-function acceptInvite() {
+async function acceptInvite() {
     if (isProcessing) return;
+    isProcessing = true;
     
     const userId = getUserId();
-    sendTelegramMessage(`✅ Пользователь согласился!\nID: ${userId}\nВыбор: Да, давай!`);
+    
+    try {
+        await db.ref('unblocked/' + userId).set({
+            unblockedAt: Date.now(),
+            timestamp: new Date().toISOString()
+        });
+        await sendTelegramMessage(`✅ Пользователь согласился!\nID: ${userId}\nВыбор: Да, давай!`);
+    } catch (error) {
+        console.error('Firebase error:', error);
+    }
     
     const modal = document.getElementById('modal');
     const mainContent = document.getElementById('mainContent');
@@ -121,6 +131,7 @@ function acceptInvite() {
         modal.classList.add('hidden');
         mainContent.classList.remove('hidden');
         mainContent.style.animation = 'cardAppear 0.6s ease-out';
+        isProcessing = false;
     }, 300);
 }
 
@@ -155,7 +166,7 @@ async function declineInviteFinal() {
     
     try {
         await blockUser();
-        sendTelegramMessage(`❌ Пользователь отказался!\nID: ${userId}\nВыбор: Нет`);
+        await sendTelegramMessage(`❌ Пользователь отказался!\nID: ${userId}\nВыбор: Нет`);
         window.location.href = 'regret.html';
     } catch (error) {
         isProcessing = false;
