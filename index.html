@@ -14,6 +14,14 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="blocked-overlay hidden" id="busyScreen">
+        <div class="blocked-card">
+            <span class="blocked-emoji">⏳</span>
+            <h2 class="blocked-title">Сайт занят</h2>
+            <p class="blocked-text">Кто-то уже проходит сайт. Подожди или попроси очистить базу.</p>
+        </div>
+    </div>
+
     <div class="blocked-overlay hidden" id="blockedScreen">
         <div class="blocked-card">
             <span class="blocked-emoji">😢</span>
@@ -44,7 +52,7 @@
         <div class="card">
             <div class="wave">🥳</div>
             <h1 class="title">Ура! Погнали!</h1>
-            <p class="subtitle">НУ тогда скачивай её</p>
+            <p class="subtitle">Выбери свою аватарку и скачай</p>
             
             <div class="avatars-wrapper">
                 <div class="avatar-container">

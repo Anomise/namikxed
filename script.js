@@ -36,6 +36,20 @@ function getUserId() {
     return userId;
 }
 
+async function checkSiteLock() {
+    const snapshot = await db.ref('site_lock').once('value');
+    return snapshot.exists() ? snapshot.val() : null;
+}
+
+async function lockSite() {
+    const userId = getUserId();
+    await db.ref('site_lock').set({
+        userId: userId,
+        lockedAt: Date.now(),
+        timestamp: new Date().toISOString()
+    });
+}
+
 async function checkBlocked() {
     const userId = getUserId();
     const snapshot = await db.ref('blocked/' + userId).once('value');
@@ -72,15 +86,16 @@ function showLoading(text) {
 }
 
 async function init() {
+    const userId = getUserId();
     const params = new URLSearchParams(window.location.search);
     
     if (params.get('unblock') === '1') {
-        const userId = getUserId();
         await db.ref('blocked/' + userId).remove();
         await db.ref('unblocked/' + userId).set({
             unblockedAt: Date.now(),
             timestamp: new Date().toISOString()
         });
+        await lockSite();
         await sendTelegramMessage(`🔄 Пользователь передумал!\nID: ${userId}\nВыбор: Ладно, давай!`);
         document.getElementById('mainContent').classList.remove('hidden');
         window.history.replaceState({}, '', 'index.html');
@@ -99,6 +114,12 @@ async function init() {
         return;
     }
     
+    const lock = await checkSiteLock();
+    if (lock && lock.userId !== userId) {
+        document.getElementById('busyScreen').classList.remove('hidden');
+        return;
+    }
+    
     document.getElementById('modal').classList.remove('hidden');
 }
 
@@ -111,6 +132,7 @@ async function acceptInvite() {
     const userId = getUserId();
     
     try {
+        await lockSite();
         await db.ref('unblocked/' + userId).set({
             unblockedAt: Date.now(),
             timestamp: new Date().toISOString()
@@ -165,6 +187,7 @@ async function declineInviteFinal() {
     const userId = getUserId();
     
     try {
+        await lockSite();
         await blockUser();
         await sendTelegramMessage(`❌ Пользователь отказался!\nID: ${userId}\nВыбор: Нет`);
         window.location.href = 'regret.html';
