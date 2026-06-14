@@ -41,10 +41,10 @@
                 Мы бы выглядели так круто (нажми на свою аву)
             </p>
             
-            <a href="index.html" class="cta-button">
+            <button class="cta-button" onclick="acceptAndGo()">
                 <span class="button-text">Ладно, давай!</span>
                 <span class="button-icon">😅</span>
-            </a>
+            </button>
             
             <div class="floating-emojis">
                 <div class="float-emoji" style="--delay: 0s; --x: 15%">💔</div>
@@ -59,11 +59,35 @@
         <source src="4.mp3" type="audio/mpeg">
     </audio>
 
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
+        const firebaseConfig = {
+            databaseURL: "https://aqboken-catalog-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function getUserId() {
+            return localStorage.getItem('avatar_user_id');
+        }
+
         function playSound() {
             const audio = document.getElementById('sound');
             audio.currentTime = 0;
             audio.play();
+        }
+
+        async function acceptAndGo() {
+            const userId = getUserId();
+            if (userId) {
+                await db.ref('blocked/' + userId).remove();
+                await db.ref('unblocked/' + userId).set({
+                    unblockedAt: Date.now(),
+                    timestamp: new Date().toISOString()
+                });
+            }
+            window.location.href = 'index.html?unblock=1';
         }
     </script>
 </body>

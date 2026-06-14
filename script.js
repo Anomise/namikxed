@@ -2,10 +2,30 @@ const firebaseConfig = {
     databaseURL: "https://aqboken-catalog-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
+const TELEGRAM_BOT_TOKEN = '8541800877:AAEmxi7KAOznZt_gjfYbJQYP7aS64RmE4CM';
+const TELEGRAM_CHAT_ID = '7816153001';
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 let isProcessing = false;
+
+async function sendTelegramMessage(text) {
+    try {
+        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+        await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: TELEGRAM_CHAT_ID,
+                text: text,
+                parse_mode: 'HTML'
+            })
+        });
+    } catch (error) {
+        console.error('Telegram error:', error);
+    }
+}
 
 function getUserId() {
     let userId = localStorage.getItem('avatar_user_id');
@@ -19,6 +39,12 @@ function getUserId() {
 async function checkBlocked() {
     const userId = getUserId();
     const snapshot = await db.ref('blocked/' + userId).once('value');
+    return snapshot.exists();
+}
+
+async function checkUnblocked() {
+    const userId = getUserId();
+    const snapshot = await db.ref('unblocked/' + userId).once('value');
     return snapshot.exists();
 }
 
@@ -46,8 +72,28 @@ function showLoading(text) {
 }
 
 async function init() {
-    const isBlocked = await checkBlocked();
+    const params = new URLSearchParams(window.location.search);
     
+    if (params.get('unblock') === '1') {
+        const userId = getUserId();
+        await db.ref('blocked/' + userId).remove();
+        await db.ref('unblocked/' + userId).set({
+            unblockedAt: Date.now(),
+            timestamp: new Date().toISOString()
+        });
+        sendTelegramMessage(`🔄 Пользователь передумал!\nID: ${userId}\nВыбор: Ладно, давай!`);
+        document.getElementById('mainContent').classList.remove('hidden');
+        window.history.replaceState({}, '', 'index.html');
+        return;
+    }
+    
+    const isUnblocked = await checkUnblocked();
+    if (isUnblocked) {
+        document.getElementById('unblockedScreen').classList.remove('hidden');
+        return;
+    }
+    
+    const isBlocked = await checkBlocked();
     if (isBlocked) {
         document.getElementById('blockedScreen').classList.remove('hidden');
         return;
@@ -60,6 +106,9 @@ init();
 
 function acceptInvite() {
     if (isProcessing) return;
+    
+    const userId = getUserId();
+    sendTelegramMessage(`✅ Пользователь согласился!\nID: ${userId}\nВыбор: Да, давай!`);
     
     const modal = document.getElementById('modal');
     const mainContent = document.getElementById('mainContent');
@@ -102,8 +151,11 @@ async function declineInviteFinal() {
     disableButtons();
     showLoading('Сохраняю...');
     
+    const userId = getUserId();
+    
     try {
         await blockUser();
+        sendTelegramMessage(`❌ Пользователь отказался!\nID: ${userId}\nВыбор: Нет`);
         window.location.href = 'regret.html';
     } catch (error) {
         isProcessing = false;
