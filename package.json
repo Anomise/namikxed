@@ -1,0 +1,11 @@
+{
+  "name": "pair-avatar-site",
+  "version": "1.0.0",
+  "description": "Парная аватарка - красивый сайт с призывом к действию",
+  "scripts": {
+    "dev": "npx serve .",
+    "deploy": "vercel --prod"
+  },
+  "keywords": ["avatar", "pair", "love"],
+  "license": "MIT"
+}

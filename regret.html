@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>Смотри что ты упустила!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1 class="title">Смотри что ты упустила!</h1>
+            
+            <div class="avatars-wrapper">
+                <div class="avatar-container">
+                    <div class="avatar left">
+                        <img src="1.jpg" alt="Я" loading="lazy">
+                        <div class="glow"></div>
+                    </div>
+                    <span class="label">Это я</span>
+                </div>
+                
+                <div class="friendship-badge">
+                    <span style="font-size: 2.5rem;">😢</span>
+                </div>
+                
+                <div class="avatar-container">
+                    <div class="avatar right" onclick="playSound()">
+                        <img src="3.jpg" alt="Моя аватарка" loading="lazy">
+                        <div class="glow"></div>
+                    </div>
+                    <span class="label">А это ты могла быть</span>
+                </div>
+            </div>
+            
+            <p class="description">
+                Мы бы выглядели так круто (нажми на свою аву)
+            </p>
+            
+            <a href="index.html" class="cta-button">
+                <span class="button-text">Ладно, давай!</span>
+                <span class="button-icon">😅</span>
+            </a>
+            
+            <div class="floating-emojis">
+                <div class="float-emoji" style="--delay: 0s; --x: 15%">💔</div>
+                <div class="float-emoji" style="--delay: 2s; --x: 40%">😭</div>
+                <div class="float-emoji" style="--delay: 4s; --x: 65%">💔</div>
+                <div class="float-emoji" style="--delay: 6s; --x: 85%">😭</div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="sound" preload="auto">
+        <source src="4.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        function playSound() {
+            const audio = document.getElementById('sound');
+            audio.currentTime = 0;
+            audio.play();
+        }
+    </script>
+</body>
+</html>
